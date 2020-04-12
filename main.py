@@ -1,6 +1,7 @@
 import cv2
 import argparse
 import math
+import os
 import progressbar
 from pointillism import *
 
@@ -10,6 +11,8 @@ parser.add_argument('--stroke-scale', default=0, type=int, help="Scale of the br
 parser.add_argument('--gradient-smoothing-radius', default=0, type=int, help="Radius of the smooth filter applied to the gradient (0 = automatic)")
 parser.add_argument('--limit-image-size', default=0, type=int, help="Limit the image size (0 = no limits)")
 parser.add_argument('img_path', nargs='?', default="images/lake.jpg")
+
+gui_enabled = not bool(os.environ.get("IS_RUNNING_IN_CONTAINER"))
 
 args = parser.parse_args()
 
@@ -40,9 +43,10 @@ palette = ColorPalette.from_image(img, args.palette_size)
 print("Extending color palette...")
 palette = palette.extend([(0, 50, 0), (15, 30, 0), (-15, 30, 0)])
 
-# display the color palette
-cv2.imshow("palette", palette.to_image())
-cv2.waitKey(200)
+if gui_enabled:
+    # display the color palette
+    cv2.imshow("palette", palette.to_image())
+    cv2.waitKey(200)
 
 print("Computing gradient...")
 gradient = VectorField.from_gradient(gray)
@@ -74,6 +78,9 @@ for h in bar(range(0, len(grid), batch_size)):
         cv2.ellipse(res, (x, y), (length, stroke_scale), angle, 0, 360, color, -1, cv2.LINE_AA)
 
 
-cv2.imshow("res", limit_size(res, 1080))
+if gui_enabled:
+    cv2.imshow("res", limit_size(res, 1080))
+
+print("Writing image to %s" % res_path)
 cv2.imwrite(res_path, res)
 cv2.waitKey(0)
