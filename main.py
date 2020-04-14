@@ -11,12 +11,15 @@ parser.add_argument('--stroke-scale', default=0, type=int, help="Scale of the br
 parser.add_argument('--gradient-smoothing-radius', default=0, type=int, help="Radius of the smooth filter applied to the gradient (0 = automatic)")
 parser.add_argument('--limit-image-size', default=0, type=int, help="Limit the image size (0 = no limits)")
 parser.add_argument('img_path', nargs='?', default="images/lake.jpg")
+parser.add_argument('res_path', nargs='?', default="drawings/lake.jpg")
 
 gui_enabled = not bool(os.environ.get("IS_RUNNING_IN_CONTAINER"))
 
 args = parser.parse_args()
 
-res_path = args.img_path.rsplit(".", -1)[0] + "_drawing.jpg"
+res_path = args.res_path
+os.makedirs(os.path.dirname(res_path), exist_ok = True)
+
 img = cv2.imread(args.img_path)
 
 if args.limit_image_size > 0:
